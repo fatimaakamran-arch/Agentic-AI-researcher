@@ -9,19 +9,6 @@ A beginner-friendly single-agent AI research application built with:
 - DuckDuckGo
 - Streamlit
 
-## How It Works
-
-The user enters a research topic.
-
-The CrewAI research agent:
-
-1. Understands the research topic.
-2. Uses DuckDuckGo as a research tool.
-3. Reviews information from multiple search results.
-4. Analyzes the information using GPT-OSS 120B through Groq.
-5. Generates a structured research report.
-6. Displays the report in Streamlit.
-
 ## Architecture
 
 User
@@ -53,13 +40,13 @@ ai-research-agent/
 
 The Groq API key is not stored in the source code.
 
-For Streamlit Cloud, add the following secret:
+In Streamlit Cloud, add this secret:
 
 ```toml
 GROQ_API_KEY = "your-groq-api-key"
 ```
 
-The application reads it using:
+The application reads it with:
 
 ```python
 st.secrets["GROQ_API_KEY"]
@@ -67,31 +54,36 @@ st.secrets["GROQ_API_KEY"]
 
 Never commit your API key to GitHub.
 
-## Deployment
+## Important Dependency
 
-1. Push all project files to GitHub.
-2. Open Streamlit Community Cloud.
-3. Select this GitHub repository.
-4. Set `app.py` as the main file.
-5. Add `GROQ_API_KEY` in Streamlit Secrets.
-6. Deploy the application.
+CrewAI needs its LiteLLM extra for the Groq provider used by this project.
 
-## Model
+The dependency is installed through:
 
-The application uses:
+```text
+crewai[litellm]
+```
+
+The LLM configuration is:
+
+```python
+LLM(
+    model="groq/openai/gpt-oss-120b",
+    api_key=groq_api_key,
+)
+```
+
+Groq's actual model ID is:
 
 ```text
 openai/gpt-oss-120b
 ```
 
-through Groq.
+## Deployment
 
-## Research Tool
-
-DuckDuckGo is exposed to the CrewAI agent as a tool.
-
-## Agent Architecture
-
-This project intentionally uses one agent.
-
-The agent is responsible for deciding when to use the DuckDuckGo search tool, analyzing the research results, and producing the final report.
+1. Push these files to GitHub.
+2. Open Streamlit Community Cloud.
+3. Select the GitHub repository.
+4. Set `app.py` as the main file.
+5. Add `GROQ_API_KEY` in Streamlit Secrets.
+6. Deploy.

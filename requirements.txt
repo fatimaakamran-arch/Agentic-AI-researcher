@@ -1,5 +1,5 @@
 streamlit
-crewai
+crewai[litellm]
 crewai-tools
 ddgs
 groq

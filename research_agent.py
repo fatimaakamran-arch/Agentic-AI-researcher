@@ -34,6 +34,8 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
+    # CrewAI uses LiteLLM for the Groq provider.
+    # The Groq model ID itself is openai/gpt-oss-120b.
     return LLM(
         model="groq/openai/gpt-oss-120b",
         api_key=groq_api_key,
@@ -128,8 +130,6 @@ Rules:
 - Use multiple sources where possible.
 - Prefer reliable and authoritative sources.
 - Clearly indicate uncertainty when information is unclear.
-- Do not treat a search-result snippet as definitive evidence
-  when the underlying source should be checked.
 - Keep the report understandable for a general reader.
 """,
         expected_output=(
@@ -148,5 +148,4 @@ Rules:
         verbose=True,
     )
 
-    result = crew.kickoff()
-    return result
+    return crew.kickoff()
