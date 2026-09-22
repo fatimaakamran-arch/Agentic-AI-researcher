@@ -1,5 +1,0 @@
-streamlit
-crewai[litellm]
-crewai-tools
-ddgs
-groq
