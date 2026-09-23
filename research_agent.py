@@ -1,8 +1,7 @@
-# --- FIX FOR CREWAI GROQ BUG ---
-# Disable CrewAI's automatic prompt cache tagging for non-Anthropic models
+# --- FIX 1: Prevent CrewAI cache_breakpoint metadata error on Groq ---
 import crewai.llms.cache as _crewai_cache
 _crewai_cache.mark_cache_breakpoint = lambda msg: msg
-# -------------------------------
+# -----------------------------------------------------------------------
 
 from crewai import Agent, Crew, LLM, Process, Task
 from crewai.tools import tool
@@ -40,11 +39,13 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
+    # --- FIX 2: Enable automatic retries when hitting Groq's 8,000 TPM limit ---
     return LLM(
         model="groq/openai/gpt-oss-120b",
         api_key=groq_api_key,
         temperature=0.2,
-        max_tokens=8000,
+        max_tokens=4000,
+        num_retries=5,
     )
 
 
@@ -66,6 +67,7 @@ def create_research_agent(groq_api_key: str) -> Agent:
         ),
         tools=[duckduckgo_search],
         llm=llm,
+        max_rpm=3,  # Throttle execution steps to keep usage within TPM limits
         verbose=True,
         allow_delegation=False,
     )
@@ -150,6 +152,7 @@ Rules:
         tasks=[research_task],
         process=Process.sequential,
         verbose=True,
+        max_rpm=3,
     )
 
     return crew.kickoff()
