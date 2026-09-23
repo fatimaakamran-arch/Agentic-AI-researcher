@@ -39,13 +39,10 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
-    # --- FIX 2: Enable automatic retries when hitting Groq's 8,000 TPM limit ---
     return LLM(
-        model="groq/openai/gpt-oss-120b",
+        model="groq/llama-3.1-8b-instant",
         api_key=groq_api_key,
         temperature=0.2,
-        max_tokens=4000,
-        num_retries=5,
     )
 
 
