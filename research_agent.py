@@ -1,7 +1,7 @@
-# --- FIX 1: Prevent CrewAI cache_breakpoint metadata error on Groq ---
+# --- FIX FOR CREWAI GROQ BUG ---
 import crewai.llms.cache as _crewai_cache
 _crewai_cache.mark_cache_breakpoint = lambda msg: msg
-# -----------------------------------------------------------------------
+# -------------------------------
 
 from crewai import Agent, Crew, LLM, Process, Task
 from crewai.tools import tool
@@ -39,10 +39,13 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
+    # Use gpt-oss-20b (Groq's official free-tier successor to llama-3.1-8b)
     return LLM(
-        model="groq/llama-3.1-8b-instant",
+        model="groq/openai/gpt-oss-20b",
         api_key=groq_api_key,
         temperature=0.2,
+        max_tokens=4000,
+        num_retries=5,
     )
 
 
@@ -64,7 +67,6 @@ def create_research_agent(groq_api_key: str) -> Agent:
         ),
         tools=[duckduckgo_search],
         llm=llm,
-        max_rpm=3,  # Throttle execution steps to keep usage within TPM limits
         verbose=True,
         allow_delegation=False,
     )
@@ -149,7 +151,6 @@ Rules:
         tasks=[research_task],
         process=Process.sequential,
         verbose=True,
-        max_rpm=3,
     )
 
     return crew.kickoff()
