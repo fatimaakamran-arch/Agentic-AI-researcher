@@ -1,3 +1,35 @@
+import litellm
+
+# Groq does not accept CrewAI's cache_breakpoint
+# metadata in chat messages.
+litellm.cache = None
+litellm.drop_params = True
+
+_original_completion = litellm.completion
+
+
+def _completion_without_cache_breakpoint(*args, **kwargs):
+    kwargs["caching"] = False
+
+    messages = kwargs.get("messages", [])
+
+    for message in messages:
+        if isinstance(message, dict):
+            message.pop("cache_breakpoint", None)
+
+            content = message.get("content")
+
+            if isinstance(content, list):
+                for block in content:
+                    if isinstance(block, dict):
+                        block.pop("cache_breakpoint", None)
+
+    return _original_completion(*args, **kwargs)
+
+
+litellm.completion = _completion_without_cache_breakpoint
+
+
 from crewai import Agent, Crew, LLM, Process, Task
 from crewai.tools import tool
 from ddgs import DDGS
@@ -34,13 +66,10 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
-    # CrewAI uses LiteLLM for the Groq provider.
-    # The Groq model ID itself is openai/gpt-oss-120b.
     return LLM(
         model="groq/openai/gpt-oss-120b",
         api_key=groq_api_key,
         temperature=0.2,
-        max_tokens=8000,
     )
 
 
