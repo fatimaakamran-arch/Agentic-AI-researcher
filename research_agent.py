@@ -39,13 +39,12 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
-    # Use gpt-oss-20b (Groq's official free-tier successor to llama-3.1-8b)
     return LLM(
         model="groq/openai/gpt-oss-20b",
         api_key=groq_api_key,
         temperature=0.2,
-        max_tokens=4000,
-        num_retries=5,
+        max_tokens=2000,   # Lower completion tokens to save context room
+        num_retries=10,    # Automatically retries when hitting 8k TPM limits
     )
 
 
@@ -67,6 +66,7 @@ def create_research_agent(groq_api_key: str) -> Agent:
         ),
         tools=[duckduckgo_search],
         llm=llm,
+        max_rpm=2,         # Paces requests to stay under 8,000 TPM
         verbose=True,
         allow_delegation=False,
     )
@@ -151,6 +151,7 @@ Rules:
         tasks=[research_task],
         process=Process.sequential,
         verbose=True,
+        max_rpm=2,         # Enforces strict execution interval
     )
 
     return crew.kickoff()
