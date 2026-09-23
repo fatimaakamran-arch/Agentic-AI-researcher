@@ -1,3 +1,9 @@
+# --- FIX FOR CREWAI GROQ BUG ---
+# Disable CrewAI's automatic prompt cache tagging for non-Anthropic models
+import crewai.llms.cache as _crewai_cache
+_crewai_cache.mark_cache_breakpoint = lambda msg: msg
+# -------------------------------
+
 from crewai import Agent, Crew, LLM, Process, Task
 from crewai.tools import tool
 from ddgs import DDGS
@@ -34,14 +40,11 @@ def duckduckgo_search(query: str) -> str:
 
 
 def create_llm(groq_api_key: str) -> LLM:
-    # Keeping your open-source model while disabling prompt caching
-    # to prevent Groq from throwing the cache_breakpoint error.
     return LLM(
         model="groq/openai/gpt-oss-120b",
         api_key=groq_api_key,
         temperature=0.2,
         max_tokens=8000,
-        cache_prompt=False,
     )
 
 
